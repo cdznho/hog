@@ -19,7 +19,7 @@ class AppTheme {
         fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
@@ -50,4 +50,3 @@ class AppTheme {
     );
   }
 }
-

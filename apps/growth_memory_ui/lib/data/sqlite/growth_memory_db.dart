@@ -1,6 +1,8 @@
 import '../models/artifact.dart';
+import '../models/coverage_insight.dart';
 import '../models/cycle.dart';
 import '../models/org.dart';
+import '../models/recommendation_insight.dart';
 import '../models/snapshot.dart';
 
 import 'growth_memory_db_web.dart' if (dart.library.io) 'growth_memory_db_io.dart';
@@ -33,6 +35,18 @@ abstract class GrowthMemoryDb {
     required DateTime windowStart,
     required DateTime windowEnd,
     required Map<String, Object?> data,
+  });
+
+  List<CoverageInsight> listCoverageInsights({String? cycleId, String? orgId});
+  void replaceCoverageInsights({
+    required String cycleId,
+    required List<Map<String, Object?>> rows,
+  });
+
+  List<RecommendationInsight> listRecommendationInsights({String? cycleId, String? orgId});
+  void replaceRecommendationInsights({
+    required String cycleId,
+    required List<Map<String, Object?>> rows,
   });
 
   List<Artifact> listArtifacts({String? orgId});

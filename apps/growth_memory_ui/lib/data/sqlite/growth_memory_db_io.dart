@@ -6,8 +6,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import '../models/artifact.dart';
+import '../models/coverage_insight.dart';
 import '../models/cycle.dart';
 import '../models/org.dart';
+import '../models/recommendation_insight.dart';
 import '../models/snapshot.dart';
 import 'growth_memory_db.dart';
 
@@ -70,6 +72,35 @@ CREATE TABLE IF NOT EXISTS artifacts (
   cycle_id TEXT NOT NULL,
   kind TEXT NOT NULL,
   path TEXT NOT NULL,
+  meta_json TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY(cycle_id) REFERENCES cycles(cycle_id)
+);
+''');
+    _db.execute('''
+CREATE TABLE IF NOT EXISTS coverage_insights (
+  insight_id TEXT PRIMARY KEY,
+  cycle_id TEXT NOT NULL,
+  category TEXT NOT NULL,
+  subcategory TEXT NOT NULL,
+  pillar_status TEXT NOT NULL,
+  cluster_current INTEGER NOT NULL,
+  cluster_target INTEGER NOT NULL,
+  coverage TEXT NOT NULL,
+  priority TEXT NOT NULL,
+  meta_json TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY(cycle_id) REFERENCES cycles(cycle_id)
+);
+''');
+    _db.execute('''
+CREATE TABLE IF NOT EXISTS recommendation_insights (
+  insight_id TEXT PRIMARY KEY,
+  cycle_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  status TEXT NOT NULL,
+  priority TEXT NOT NULL,
+  owner TEXT NOT NULL,
   meta_json TEXT NOT NULL,
   created_at TEXT NOT NULL,
   FOREIGN KEY(cycle_id) REFERENCES cycles(cycle_id)
@@ -225,6 +256,134 @@ VALUES(?, ?, ?, ?, ?, ?, ?);
         createdAt,
       ],
     );
+  }
+
+  @override
+  List<CoverageInsight> listCoverageInsights({String? cycleId, String? orgId}) {
+    final sql = StringBuffer(
+      '''
+SELECT i.insight_id, i.cycle_id, i.category, i.subcategory, i.pillar_status, i.cluster_current, i.cluster_target, i.coverage, i.priority, i.meta_json, i.created_at
+FROM coverage_insights i
+JOIN cycles c ON c.cycle_id = i.cycle_id
+''',
+    );
+    final args = <Object?>[];
+    if (cycleId != null) {
+      sql.write(' WHERE i.cycle_id = ?');
+      args.add(cycleId);
+    } else if (orgId != null) {
+      sql.write(' WHERE c.org_id = ?');
+      args.add(orgId);
+    }
+    sql.write(' ORDER BY i.category, i.subcategory;');
+    final result = _db.select(sql.toString(), args);
+    return [
+      for (final row in result)
+        CoverageInsight(
+          insightId: row['insight_id'] as String,
+          cycleId: row['cycle_id'] as String,
+          category: row['category'] as String,
+          subcategory: row['subcategory'] as String,
+          pillarStatus: row['pillar_status'] as String,
+          clusterCurrent: row['cluster_current'] as int,
+          clusterTarget: row['cluster_target'] as int,
+          coverage: row['coverage'] as String,
+          priority: row['priority'] as String,
+          metaJson: row['meta_json'] as String,
+          createdAt: DateTime.parse(row['created_at'] as String),
+        ),
+    ];
+  }
+
+  @override
+  void replaceCoverageInsights({
+    required String cycleId,
+    required List<Map<String, Object?>> rows,
+  }) {
+    _db.execute('DELETE FROM coverage_insights WHERE cycle_id = ?;', [cycleId]);
+    final now = DateTime.now().toUtc().toIso8601String();
+    for (final row in rows) {
+      _db.execute(
+        '''
+INSERT INTO coverage_insights(insight_id, cycle_id, category, subcategory, pillar_status, cluster_current, cluster_target, coverage, priority, meta_json, created_at)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+''',
+        [
+          row['insight_id'],
+          cycleId,
+          row['category'],
+          row['subcategory'],
+          row['pillar_status'],
+          row['cluster_current'],
+          row['cluster_target'],
+          row['coverage'],
+          row['priority'],
+          jsonEncode(row['meta'] ?? <String, Object?>{}),
+          now,
+        ],
+      );
+    }
+  }
+
+  @override
+  List<RecommendationInsight> listRecommendationInsights({String? cycleId, String? orgId}) {
+    final sql = StringBuffer(
+      '''
+SELECT i.insight_id, i.cycle_id, i.title, i.status, i.priority, i.owner, i.meta_json, i.created_at
+FROM recommendation_insights i
+JOIN cycles c ON c.cycle_id = i.cycle_id
+''',
+    );
+    final args = <Object?>[];
+    if (cycleId != null) {
+      sql.write(' WHERE i.cycle_id = ?');
+      args.add(cycleId);
+    } else if (orgId != null) {
+      sql.write(' WHERE c.org_id = ?');
+      args.add(orgId);
+    }
+    sql.write(' ORDER BY i.created_at DESC, i.priority;');
+    final result = _db.select(sql.toString(), args);
+    return [
+      for (final row in result)
+        RecommendationInsight(
+          insightId: row['insight_id'] as String,
+          cycleId: row['cycle_id'] as String,
+          title: row['title'] as String,
+          status: row['status'] as String,
+          priority: row['priority'] as String,
+          owner: row['owner'] as String,
+          metaJson: row['meta_json'] as String,
+          createdAt: DateTime.parse(row['created_at'] as String),
+        ),
+    ];
+  }
+
+  @override
+  void replaceRecommendationInsights({
+    required String cycleId,
+    required List<Map<String, Object?>> rows,
+  }) {
+    _db.execute('DELETE FROM recommendation_insights WHERE cycle_id = ?;', [cycleId]);
+    final now = DateTime.now().toUtc().toIso8601String();
+    for (final row in rows) {
+      _db.execute(
+        '''
+INSERT INTO recommendation_insights(insight_id, cycle_id, title, status, priority, owner, meta_json, created_at)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?);
+''',
+        [
+          row['insight_id'],
+          cycleId,
+          row['title'],
+          row['status'],
+          row['priority'],
+          row['owner'],
+          jsonEncode(row['meta'] ?? <String, Object?>{}),
+          now,
+        ],
+      );
+    }
   }
 
   @override
