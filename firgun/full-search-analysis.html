@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Firgun Ventures — Full Search Analysis</title>
+<style>
+  :root {
+    --brand: #6C47FF;
+    --brand-light: #EEE9FF;
+    --brand-mid: #9B7DFF;
+    --dark: #0F0C1D;
+    --text: #1E1B2E;
+    --muted: #6B6880;
+    --border: #E4E1EF;
+    --bg: #FAFAF9;
+    --white: #FFFFFF;
+    --green: #16A34A;
+    --blue: #2563EB;
+    --yellow: #D97706;
+    --red: #DC2626;
+    --purple: #6E3DC9;
+    --code-bg: #F5F3FF;
+    --badge-both: #16A34A;
+    --badge-llm: #6C47FF;
+    --badge-trad: #2563EB;
+    --framer: #0055FF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: none; margin: 0; background: transparent; padding: 0; border: 0; min-height: 100vh; }
+  .page > .eyebrow:first-child,
+  .page > h1.cover,
+  .page > .subtitle,
+  .page > .meta {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    z-index: 1;
+  }
+  .page::before {
+    content: '';
+    display: block;
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 390px;
+    background: linear-gradient(135deg, #0F0C1D 0%, #1C1440 60%, #2D1B69 100%);
+    z-index: 0;
+  }
+  .page::after {
+    content: '';
+    position: absolute;
+    top: -120px;
+    right: -120px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(108,71,255,0.35) 0%, transparent 70%);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brand-mid);
+    margin-bottom: 12px;
+  }
+  .page > .eyebrow:first-child { padding-top: 64px; color: var(--brand-mid); }
+  h1.cover {
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--white);
+    max-width: 780px;
+    margin-bottom: 12px;
+    letter-spacing: -0.025em;
+  }
+  h1.cover em { color: #A78BFA; font-style: normal; }
+  p.subtitle {
+    font-size: 17px;
+    color: rgba(255,255,255,0.68);
+    max-width: 720px;
+    margin-bottom: 34px;
+  }
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 52px;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+  }
+  .meta > div { padding: 16px 18px; border-right: 1px solid rgba(255,255,255,0.12); }
+  .meta > div:last-child { border-right: 0; }
+  .meta .label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.42); letter-spacing: 0.1em; text-transform: uppercase; }
+  .meta .val { font-size: 14px; color: rgba(255,255,255,0.86); margin-top: 4px; font-weight: 600; }
+  .legend,
+  .page > h1:not(.cover),
+  .page > hr.rule,
+  .page > ol.toc,
+  .page > footer,
+  section {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+  .legend {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+    margin-top: 18px;
+    margin-bottom: 36px;
+    box-shadow: 0 16px 42px rgba(15,12,29,0.06);
+  }
+  .badge {
+    display: inline-block;
+    color: white;
+    font-weight: 800;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    padding: 4px 9px;
+    border-radius: 999px;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  .badge-both { background: var(--badge-both); }
+  .badge-llm { background: var(--badge-llm); }
+  .badge-trad { background: var(--badge-trad); }
+  .badge-framer { background: var(--framer); }
+  .tagged {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 14px;
+    padding: 12px 0;
+    align-items: start;
+    border-bottom: 1px solid var(--border);
+  }
+  .tagged:last-child { border-bottom: 0; }
+  .tagged .b { padding-top: 2px; }
+  .tagged p { margin: 0; font-size: 14px; }
+  .tagged strong { color: var(--dark); }
+  .page > h1:not(.cover), section h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--dark);
+    margin-top: 28px;
+    margin-bottom: 8px;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+  h2 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--dark);
+    margin: 32px 0 10px;
+  }
+  h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 20px 0 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  p { margin-bottom: 12px; color: var(--text); }
+  a { color: var(--brand); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  hr.rule { border: 0; border-top: 1px solid var(--border); margin-top: 8px; margin-bottom: 20px; }
+  ol.toc {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 8px;
+    list-style: none;
+    margin-bottom: 28px;
+  }
+  ol.toc li { margin: 0; }
+  ol.toc a {
+    display: block;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    background: var(--white);
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.15s ease;
+  }
+  ol.toc a:hover { border-color: var(--brand); background: var(--brand-light); color: var(--brand); text-decoration: none; }
+  section {
+    padding-top: 56px;
+    padding-bottom: 56px;
+    border-bottom: 1px solid var(--border);
+  }
+  section:last-of-type { border-bottom: 0; }
+  section > .eyebrow:first-child {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--brand);
+    background: var(--brand-light);
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 14px 0 24px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  thead th {
+    background: var(--dark);
+    color: #fff;
+    text-align: left;
+    padding: 11px 12px;
+    font-weight: 700;
+    font-size: 12px;
+  }
+  tbody td {
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    vertical-align: top;
+    background: var(--white);
+  }
+  tbody tr:nth-child(even) td { background: #FBFAFF; }
+  code {
+    background: var(--code-bg);
+    color: var(--brand);
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 13px;
+  }
+  pre {
+    background: var(--dark);
+    color: #E6EDF3;
+    padding: 16px;
+    border-radius: 12px;
+    overflow-x: auto;
+    font-size: 12.5px;
+    line-height: 1.55;
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+  }
+  ol.wins { padding-left: 22px; }
+  ol.wins li { margin-bottom: 10px; }
+  .framer-box {
+    border-left: 4px solid var(--framer);
+    background: #F0F5FF;
+    padding: 14px 16px;
+    margin: 16px 0 18px;
+    border-radius: 0 12px 12px 0;
+  }
+  .framer-box .b-title {
+    font-weight: 800;
+    color: var(--framer);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .framer-box p { font-size: 13.5px; margin: 0 0 6px; }
+  footer {
+    margin-top: 60px;
+    padding-top: 22px;
+    padding-bottom: 60px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  @media (max-width: 780px) {
+    .page::before { height: 480px; }
+    .page > .eyebrow:first-child,
+    .page > h1.cover,
+    .page > .subtitle,
+    .page > .meta,
+    .legend,
+    .page > h1:not(.cover),
+    .page > hr.rule,
+    .page > ol.toc,
+    .page > footer,
+    section {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+    .page > .eyebrow:first-child { padding-top: 38px; }
+    h1.cover { font-size: 30px; }
+    .meta { grid-template-columns: 1fr 1fr; }
+    .tagged { grid-template-columns: 1fr; gap: 6px; }
+    ol.toc { grid-template-columns: 1fr; }
+  }
+  @media print {
+    body { background: white; }
+    .page::before, .page::after { display: none; }
+    h1.cover, p.subtitle, .page > .eyebrow:first-child { color: var(--dark); }
+    .meta { border-color: var(--border); background: white; }
+    .meta .label, .meta .val { color: var(--text); }
+    section { break-before: page; }
+  }
+
+    /* -- REPORT SWITCHER -- */
+    .report-switcher {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      padding: 12px 24px;
+      background: rgba(15, 12, 29, 0.94);
+      border-bottom: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 16px 44px rgba(15,12,29,0.24);
+      backdrop-filter: blur(16px);
+    }
+    .report-switcher-title {
+      color: rgba(255,255,255,0.86);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .report-switcher-options {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .report-switcher a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 8px 14px;
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 999px;
+      color: rgba(255,255,255,0.78);
+      background: rgba(255,255,255,0.08);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1;
+      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+    }
+    .report-switcher a:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(255,255,255,0.38);
+    }
+    .report-switcher a.active {
+      background: var(--brand, #6C47FF);
+      border-color: var(--brand, #6C47FF);
+      color: #fff;
+      box-shadow: 0 10px 26px rgba(108,71,255,0.32);
+    }
+    @media (max-width: 720px) {
+      .report-switcher {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 12px 16px;
+      }
+      .report-switcher-options { justify-content: flex-start; }
+      .report-switcher a { font-size: 12px; padding: 8px 12px; }
+    }
+
+</style>
+
+</head>
+<body>
+  <nav class="report-switcher" aria-label="Firgun report chooser">
+    <div class="report-switcher-title">Firgun report chooser</div>
+    <div class="report-switcher-options">
+      <a href="/firgun/llm-seo/">LLM SEO</a>
+      <a class="active" aria-current="page" href="/firgun/full-search-analysis/">Full Search Analysis</a>
+    </div>
+  </nav>
+<div class="page">
+
+<!-- COVER -->
+<p class="eyebrow">Integrated SEO + LLM SEO Strategy</p>
+<h1 class="cover">Firgun Ventures: own the quantum fund search wedge <em>and</em> the AI-answer surface</h1>
+<p class="subtitle">A unified strategy combining the DataForSEO + Ahrefs traditional organic plan (firgun-seo-strategy.pdf) with the LLM / GEO readiness review, marking every recommendation as useful for <strong>Both</strong>, <strong>LLM SEO only</strong>, or <strong>Traditional SEO only</strong>. Framer-specific implementation notes flagged throughout.</p>
+
+<div class="meta">
+  <div><div class="label">Website</div><div class="val">firgun.vc</div></div>
+  <div><div class="label">Stack</div><div class="val">Framer</div></div>
+  <div><div class="label">Date</div><div class="val">April 20, 2026</div></div>
+  <div><div class="label">Primary motion</div><div class="val">Fix → publish → prove entity</div></div>
+</div>
+
+<!-- LEGEND -->
+<p class="eyebrow">How to read this document</p>
+<div class="legend">
+  <div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span>
+    <p><strong>Both</strong> — strengthens classic Google rankings <em>and</em> LLM visibility (ChatGPT, Claude, Perplexity, Gemini, Google AI Overviews). Highest-leverage work; do first.</p></div>
+  <div class="tagged"><span class="b"><span class="badge badge-trad">TRADITIONAL SEO</span></span>
+    <p><strong>Traditional SEO</strong> — primarily about classic SERP ranking: keyword volume / KD targeting, snippet and PAA capture, technical crawl hygiene, backlink growth, competitive gap on blue-link SERPs.</p></div>
+  <div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span>
+    <p><strong>LLM SEO</strong> — primarily about being cited by AI answer engines: entity / Organization / Person schema, owning conversational queries, publishing answer-extractable prose, and making content legible to AI crawlers.</p></div>
+  <div class="tagged"><span class="b"><span class="badge badge-framer">FRAMER</span></span>
+    <p><strong>Framer note</strong> — implementation detail or caveat specific to Firgun's Framer build (custom code blocks, CMS collections, SEO fields, <code>robots.txt</code> handling, raw-HTML audit).</p></div>
+</div>
+
+<!-- TOC -->
+<h1>Contents</h1>
+<hr class="rule">
+<ol class="toc">
+  <li><a href="#s1">Integrated Executive Summary</a></li>
+  <li><a href="#s2">Where the Two Strategies Agree &amp; Diverge</a></li>
+  <li><a href="#s3">Technical Foundation — Crawl, Index, Schema, Entity</a></li>
+  <li><a href="#s4">Keyword &amp; Conversational Query Strategy</a></li>
+  <li><a href="#s5">Content Architecture — Sectors, Pillars, Answer Pages</a></li>
+  <li><a href="#s6">Distribution — On-Domain Editorial, PR, LP Surface</a></li>
+  <li><a href="#s7">Quick Wins (First 14 Days)</a></li>
+  <li><a href="#s8">Competitive &amp; Citation Gap</a></li>
+  <li><a href="#s9">Integrated 90-Day Roadmap</a></li>
+  <li><a href="#s10">Measurement — What to Track in Each Channel</a></li>
+  <li><a href="#s11">Deprioritised Keywords &amp; Queries</a></li>
+  <li><a href="#s12">Framer Implementation Playbook</a></li>
+  <li><a href="#s13">Sources and Data Provenance</a></li>
+</ol>
+
+<!-- SECTION 1 -->
+<section id="s1" class="section">
+<p class="eyebrow">Section 1</p>
+<h1>Integrated Executive Summary</h1>
+<hr class="rule">
+<p>Firgun is <strong>brand indexed but category invisible on both search surfaces</strong>. Google knows Firgun exists (Ahrefs Health 94, DR 19, 21 referring domains) but has no category pages to rank. LLMs can identify Firgun by name but cannot cite it for conversational founder and LP queries because (a) there is effectively zero on-domain editorial content, (b) there is no <code>Organization</code> or <code>Person</code> JSON-LD, (c) the <code>/newsletter</code> page has almost no body content, and (d) the Framer build renders some text inside components that AI crawlers do not always execute.</p>
+
+<p>The two analyses converge on the same root cause — <strong>there is not enough crawlable, entity-linked content on firgun.vc</strong> — but prescribe complementary fixes. Traditional SEO says: ship sector pages, a pillar hub, and a signature data report to target high-intent quantum terms. LLM SEO says: prove the entity with schema, write answer-shaped prose for conversational queries, and make the Framer site legible to LLM crawlers. Done together, the same page can rank on Google <em>and</em> be cited by ChatGPT.</p>
+
+<h2>The three converging imperatives</h2>
+
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span>
+  <p><strong>Start publishing on-domain editorial.</strong> Firgun currently has almost no crawlable editorial content on firgun.vc. Activating <code>/newsletter</code> and <code>/insights</code> as active publishing surfaces — not just landing pages — is the single change that benefits both surfaces most.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span>
+  <p><strong>Ship the sector + pillar surface.</strong> <code>/sectors/quantum-sensing</code>, <code>/sectors/quantum-computing</code>, <code>/sectors/quantum-communications</code>, and <code>/insights/quantum-venture-capital</code> serve Google's blue-link intent and give LLMs canonical entity-attached paragraphs to quote.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span>
+  <p><strong>Add structured data.</strong> Organization, Person (for GPs), FAQPage, Article, and Report schema feed Google's entity graph and AI Overviews, and they also feed the entity-linking pipelines that Perplexity, ChatGPT Search, and Gemini use to decide who to cite.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-trad">TRADITIONAL SEO</span></span>
+  <p><strong>Capture low-KD commercial terms.</strong> <em>Quantum sensing</em> (2,400/mo, KD 13) and <em>quantum venture capital</em> (40/mo, KD 6) are classic Google ranking bets. Volume matters here in a way it does not for LLM SEO.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span>
+  <p><strong>Own conversational queries.</strong> Founders do not ask ChatGPT "quantum venture capital"; they ask "who funds Series A quantum computing startups in the US?". Write pages that answer those sentences directly, inside the first 100 words, with an entity mention of Firgun Ventures.</p></div>
+
+<div class="framer-box">
+  <div class="b-title">Framer Note</div>
+  <p><strong>Raw HTML audit is priority zero.</strong> Before writing new content, <code>curl</code> every existing firgun.vc page with JavaScript disabled. Anything rendered only by Framer components at runtime is invisible to most LLM crawlers (and to basic Googlebot fallback modes). Move key paragraphs into text blocks that appear in server-rendered HTML.</p>
+</div>
+</section>
+
+<!-- SECTION 2 -->
+<section id="s2" class="section">
+<p class="eyebrow">Section 2</p>
+<h1>Where the Two Strategies Agree &amp; Diverge</h1>
+<hr class="rule">
+<p>Both analyses see the same gap; they prescribe overlapping but not identical fixes. The matrix below makes the overlap explicit so Firgun can stage work without duplicating effort.</p>
+
+<table>
+<thead><tr><th>Theme</th><th>Traditional SEO view</th><th>LLM SEO view</th><th>Label</th></tr></thead>
+<tbody>
+<tr><td>Content volume</td><td>Only ~17 crawlable URLs; almost no keyword-targeted pages.</td><td>Zero editorial on firgun.vc beyond team/portfolio; LLMs have nothing to quote.</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>Newsletter</td><td>Mentioned only as a page needing an H1.</td><td>Turn <code>/newsletter</code> into an active publishing surface with issue archive; each issue a standalone URL.</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>Insights / blog</td><td>Publish category pages; no blog required.</td><td><code>/insights</code> as a content feed indexed by AI crawlers — richer signal than a sitemap alone.</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>Structured data</td><td>Add Organization, Person, FAQPage, Article, Report schema for SERP features.</td><td>Same schema — primarily for entity graph and AI citation eligibility.</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>Keyword targets</td><td>quantum sensing, quantum fund, quantum computing startups, quantum VC.</td><td>Conversational queries: "who invests in quantum startups", "Series A quantum VC".</td><td>Both (different shapes)</td></tr>
+<tr><td>Pillar pages</td><td><code>/insights/quantum-venture-capital</code> as the category hub.</td><td>5 pillars: definition, fundraising, market overview, lab-to-market, applications.</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>Signature asset</td><td>Proprietary data report: <code>/research/quantum-funding-report-2026</code>.</td><td>Data report doubles as the most-cited LLM source once Report schema is added.</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>SERP features</td><td>Build for snippet / PAA eligibility even where none detected today.</td><td>Not the priority; AI answers often bypass the SERP.</td><td><span class="badge badge-trad">TRADITIONAL SEO</span></td></tr>
+<tr><td>Backlinks</td><td>Convert PR (Forbes, Substack, Entrepreneur, Crunchbase, Quantum Computing Report) into category-page links.</td><td>High-authority citations are a weaker signal for LLMs than entity clarity.</td><td><span class="badge badge-trad">TRADITIONAL SEO</span></td></tr>
+<tr><td>Entity / Person schema</td><td>Useful for author E-E-A-T.</td><td>Essential — LLMs need Person nodes to attribute quotes to GPs.</td><td><span class="badge badge-llm">LLM SEO</span></td></tr>
+<tr><td>FAQ content</td><td>Quantum VC FAQ helps long-tail head-term ranking.</td><td>FAQPage schema is the single highest-ROI snippet for AI answers.</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>Technical hygiene (H1, titles, meta, alt)</td><td>Week-1 work before publishing.</td><td>Minor impact — LLMs do not weight titles the way Google does.</td><td><span class="badge badge-trad">TRADITIONAL SEO</span></td></tr>
+<tr><td>AI-crawler access</td><td>Not applicable.</td><td>Unblock GPTBot, OAI-SearchBot, PerplexityBot, ClaudeBot, Google-Extended, CCBot in robots.txt. Publish <code>llms.txt</code>.</td><td><span class="badge badge-llm">LLM SEO</span></td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- SECTION 3 -->
+<section id="s3" class="section">
+<p class="eyebrow">Section 3</p>
+<h1>Technical Foundation — Crawl, Index, Schema, Entity</h1>
+<hr class="rule">
+<p>Both surfaces need the site to be legible to crawlers — but the second category of crawler (OAI-SearchBot, PerplexityBot, ClaudeBot, GPTBot, Google-Extended) is newer and behaves slightly differently. Complete the Ahrefs-surfaced hygiene items, then add the LLM-specific layer on top.</p>
+
+<h2>Ahrefs technical fixes (Week 1)</h2>
+
+<div class="tagged"><span class="b"><span class="badge badge-trad">TRADITIONAL SEO</span></span>
+  <p><strong>Remove <code>/404</code> from <code>sitemap.xml</code></strong> so <code>firgun.vc/404</code> is not discoverable in the index path.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span>
+  <p><strong>Add missing H1s.</strong> Newsletter: "Quantum VC Insights from Firgun Ventures". Careers: "Careers at Firgun Ventures". FAQ: "Quantum Venture Capital FAQ". Google uses H1 for topic relevance; LLMs use H1 to segment pages during retrieval.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-trad">TRADITIONAL SEO</span></span>
+  <p><strong>Shorten titles.</strong> Home: "Firgun Ventures | Series A/B Quantum VC". Portfolio: "Quantum Portfolio &amp; Investment Focus | Firgun". FAQ: "Quantum VC FAQ | Firgun Ventures".</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-trad">TRADITIONAL SEO</span></span>
+  <p><strong>Differentiate meta descriptions.</strong> Rewrite home, about, careers, contact, portfolio, and FAQ descriptions to 145–160 characters with page-specific intent. Click-through signal for the Google SERP.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span>
+  <p><strong>Fix image alt text.</strong> 48 missing alt references across 11 pages, especially <code>/news</code>. Alt text is both an accessibility and keyword signal — and LLMs use alt text to describe embedded images when answering queries.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-trad">TRADITIONAL SEO</span></span>
+  <p><strong>Review noindex pages.</strong> Legal noindex is fine. <code>/linkedin</code> should be noindex only if it stays as a utility redirect; otherwise replace with a clean 301.</p></div>
+
+<div class="framer-box">
+  <div class="b-title">Framer Note — Ahrefs fixes</div>
+  <p><strong>Titles and meta descriptions:</strong> edit per-page under <em>Site Settings → Pages → SEO</em> in Framer. Framer auto-generates H1 from the page title unless you place an explicit text element styled as H1.</p>
+  <p><strong>Sitemap:</strong> Framer generates <code>sitemap.xml</code> automatically; to exclude <code>/404</code>, either mark it as noindex in page SEO or use a custom sitemap override in <em>Site Settings</em>.</p>
+  <p><strong>Alt text:</strong> set on each image via the right-hand properties panel (<em>Accessibility → Alt text</em>). Missing across 48 images on /news suggests a CMS collection needs bulk editing.</p>
+</div>
+
+<h2>Structured data (JSON-LD) — high ROI for both</h2>
+
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span>
+  <p><strong>Organization schema</strong> on every page with <code>@id = https://firgun.vc/#organization</code>. Include <code>legalName</code>, <code>foundingDate</code> (2024), <code>description</code>, <code>url</code>, <code>logo</code>, <code>sameAs</code> (LinkedIn, Crunchbase, X/Twitter), and <code>numberOfEmployees</code> range. The single entry point that feeds Google's Knowledge Graph <em>and</em> the entity-resolution pipelines used by Perplexity, ChatGPT Search, and Gemini.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span>
+  <p><strong>Person schema</strong> for each GP (<code>@type: Person</code>, <code>jobTitle</code>, <code>worksFor</code>, <code>sameAs</code> LinkedIn/Twitter, <code>alumniOf</code>, <code>knowsAbout</code>). Google uses this for author E-E-A-T; the real payoff is LLM attribution — when ChatGPT is asked who leads Firgun, Person nodes are how it answers reliably.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span>
+  <p><strong>FAQPage schema</strong> on <code>/faq</code> and at the bottom of every sector / pillar page. AI answer engines pull FAQ Q/A pairs directly into generated responses as high-confidence quotes.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span>
+  <p><strong>Article schema</strong> on all <code>/insights/</code> and <code>/newsletter/</code> pages (<code>author</code> as Person @id, <code>publisher</code> as Organization @id, <code>datePublished</code>, <code>dateModified</code>, <code>headline</code>, <code>description</code>, <code>mainEntityOfPage</code>). Pairs author entity with content entity.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span>
+  <p><strong>Report schema</strong> (<code>@type: Report</code>) on <code>/research/quantum-funding-report-2026</code>, with <code>about</code>, <code>datePublished</code>, <code>publisher</code>, and <code>isAccessibleForFree</code>. LLMs flag this type as a citeable primary source.</p></div>
+
+<div class="framer-box">
+  <div class="b-title">Framer Note — JSON-LD</div>
+  <p>Framer does not expose a UI for arbitrary JSON-LD, but it accepts <strong>custom <code>&lt;head&gt;</code> HTML</strong> per site and per page.</p>
+  <p><strong>Site-wide:</strong> <em>Site Settings → General → Custom Code → End of &lt;head&gt; tag</em> — paste the Organization and Person graph once.</p>
+  <p><strong>Per-page:</strong> <em>Page Settings → Custom Code → End of &lt;head&gt;</em> — for Article, Report, and FAQPage nodes specific to that URL.</p>
+  <p><strong>CMS-driven:</strong> for <code>/insights</code> articles generated from a Framer CMS collection, build the Article JSON-LD once in the collection template using <em>Insert → Code Component</em> and bind fields (<code>headline</code>, <code>datePublished</code>, etc.) to CMS variables.</p>
+</div>
+
+<h2>LLM-specific crawler &amp; infra items</h2>
+
+<div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span>
+  <p><strong>robots.txt allowlist</strong> for <code>GPTBot</code>, <code>OAI-SearchBot</code>, <code>ClaudeBot</code>, <code>PerplexityBot</code>, <code>Google-Extended</code>, and <code>CCBot</code>. Firgun is a fund brand — no reason to block them. Blocking them (or leaving Framer defaults untested) is the most common silent failure mode for LLM SEO.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span>
+  <p><strong><code>llms.txt</code></strong> at <code>firgun.vc/llms.txt</code> summarising Firgun's positioning, sectors, stage focus (Series A/B), fund size ($250m), portfolio, and canonical URLs for each pillar page. Treat it as a human-readable index for AI crawlers.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span>
+  <p><strong>Plain-text prose over rich Framer components.</strong> Firgun is built on Framer, which can render content inside JavaScript components that some LLM crawlers do not execute. Audit each page's raw HTML (<code>curl</code>, no JS) and move the key paragraphs into simple text blocks visible server-side.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span>
+  <p><strong>Internal links with precise anchor text.</strong> Home, FAQ, About, Portfolio, sector pages, and reports should cross-link with keyword-rich anchors ("quantum venture capital", "quantum sensing startups", not "learn more"). Helps PageRank for Google and entity co-occurrence for LLMs.</p></div>
+
+<div class="framer-box">
+  <div class="b-title">Framer Note — robots.txt and llms.txt</div>
+  <p><strong>robots.txt:</strong> Framer generates a default <code>robots.txt</code> but allows custom overrides under <em>Site Settings → General → Custom robots.txt</em>. Paste an explicit <code>Allow</code> rule for each AI crawler user-agent.</p>
+  <p><strong>llms.txt:</strong> Framer does not natively support arbitrary static files. Workaround — create a page at the path <code>/llms.txt</code>, set its response type to plain text via custom code, or host the file on a subdomain / CDN and reference it from robots.txt. Alternative: embed the same summary as visible text on an unlisted <code>/ai-brief</code> page and reference it from <code>robots.txt</code> comments.</p>
+</div>
+</section>
+
+<!-- SECTION 4 -->
+<section id="s4" class="section">
+<p class="eyebrow">Section 4</p>
+<h1>Keyword &amp; Conversational Query Strategy</h1>
+<hr class="rule">
+<p>Traditional SEO targets a head keyword with a volume / KD / opportunity-score profile. LLM SEO targets a <em>prompt</em> — a full-sentence question a user types into ChatGPT or Perplexity — and measures success by whether Firgun is quoted. Both shapes can be served by the same page if the page is written as an answer to the prompt and also targets the keyword.</p>
+
+<h2>4.1 Traditional keyword targets <span class="badge badge-trad">TRADITIONAL SEO</span></h2>
+
+<table>
+<thead><tr><th>Keyword</th><th>Vol/mo</th><th>KD</th><th>Intent</th><th>Opp.</th><th>Type</th></tr></thead>
+<tbody>
+<tr><td>quantum sensing</td><td>2,400</td><td>13</td><td>Informational</td><td>8.6</td><td>Body</td></tr>
+<tr><td>post quantum cryptography</td><td>6,600</td><td>48</td><td>Informational</td><td>7.2</td><td>Head</td></tr>
+<tr><td>quantum cryptography</td><td>4,400</td><td>37</td><td>Informational</td><td>7.2</td><td>Body</td></tr>
+<tr><td>quantum technology</td><td>3,600</td><td>39</td><td>Informational</td><td>7.0</td><td>Head</td></tr>
+<tr><td>quantum computing applications</td><td>880</td><td>39</td><td>Informational</td><td>6.8</td><td>Body</td></tr>
+<tr><td>quantum startups</td><td>110</td><td>12</td><td>Commercial</td><td>7.3</td><td>Body</td></tr>
+<tr><td>quantum computing startups</td><td>320</td><td>38</td><td>Commercial</td><td>6.5</td><td>Body</td></tr>
+<tr><td>quantum venture capital</td><td>40</td><td>6</td><td>Commercial</td><td>6.5</td><td>Pillar</td></tr>
+<tr><td>quantum vc</td><td>40</td><td>12</td><td>Commercial</td><td>6.5</td><td>Pillar synonym</td></tr>
+<tr><td>quantum investment</td><td>260</td><td>20</td><td>Commercial</td><td>7.2</td><td>Body</td></tr>
+<tr><td>quantum fund</td><td>880</td><td>32</td><td>Commercial</td><td>7.0</td><td>Body</td></tr>
+<tr><td>deep tech venture capital</td><td>140</td><td>23</td><td>Commercial</td><td>6.8</td><td>Body</td></tr>
+<tr><td>deep tech vc</td><td>140</td><td>30</td><td>Commercial</td><td>6.6</td><td>Body</td></tr>
+</tbody>
+</table>
+
+<p><strong>SERP-feature read (DataForSEO):</strong> no AI Overview, People Also Ask, or featured snippet was detected on the sampled US SERP for any priority term. The opportunity today is classic organic ranking, not snippet capture. That reinforces the LLM SEO thesis: because Google has not yet generated AI Overviews for most quantum queries, the first fund to publish well-structured answer content will <em>shape</em> what the AI Overview becomes.</p>
+
+<h2>4.2 Conversational queries to own <span class="badge badge-llm">LLM SEO</span></h2>
+<p>Each query below is phrased as a user actually types into ChatGPT / Claude / Perplexity. Firgun should aim to be cited in the answer.</p>
+
+<table>
+<thead><tr><th>Prompt</th><th>Target page</th><th>Answer shape</th></tr></thead>
+<tbody>
+<tr><td>who invests in quantum computing startups Series A</td><td><code>/insights/series-a-quantum-startups</code></td><td>Named list with Firgun at top, 1-sentence thesis per fund.</td></tr>
+<tr><td>best quantum venture capital firms 2026</td><td><code>/insights/quantum-venture-capital</code></td><td>Ranked list with size, stage, sectors, HQ.</td></tr>
+<tr><td>what is a quantum fund</td><td><code>/insights/quantum-venture-capital</code></td><td>Definition in first 60 words + examples including Firgun.</td></tr>
+<tr><td>who funds quantum sensing startups</td><td><code>/sectors/quantum-sensing</code></td><td>Named investors with Firgun as specialist.</td></tr>
+<tr><td>how to raise Series A for a quantum startup</td><td><code>/insights/quantum-startup-funding</code></td><td>Numbered step-by-step, criteria, named shortlist.</td></tr>
+<tr><td>quantum computing startup funding trends 2026</td><td><code>/research/quantum-funding-report-2026</code></td><td>Headline numbers in first paragraph, citeable chart captions.</td></tr>
+<tr><td>who is Firgun Ventures</td><td>Homepage + Organization schema</td><td>One-sentence entity description; schema-backed.</td></tr>
+<tr><td>$250m quantum venture fund</td><td>Homepage + <code>/about</code></td><td>Explicit fund size, vintage, sectors, stage.</td></tr>
+<tr><td>quantum communications investors</td><td><code>/sectors/quantum-communications</code></td><td>Named list including PQC focus.</td></tr>
+<tr><td>quantum VC portfolio companies</td><td><code>/portfolio</code></td><td>Company list with 1-line thesis; Person schema on GP quotes.</td></tr>
+<tr><td>is quantum sensing commercially viable</td><td><code>/sectors/quantum-sensing</code></td><td>Direct opening; verticals (diagnostics, navigation, imaging).</td></tr>
+<tr><td>lab to market quantum startups</td><td><code>/insights/lab-to-market-quantum</code></td><td>Framework named, with Firgun's criteria and examples.</td></tr>
+<tr><td>post quantum cryptography investors</td><td><code>/sectors/quantum-communications</code></td><td>Cross-reference NIST; name PQC-active funds.</td></tr>
+<tr><td>deep tech VC for quantum</td><td><code>/insights/quantum-venture-capital</code></td><td>Define deep tech, position Firgun as specialist subset.</td></tr>
+<tr><td>quantum market map</td><td><code>/market-map/quantum-startups</code></td><td>Cited data report; clusters labelled with representatives.</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- SECTION 5 -->
+<section id="s5" class="section">
+<p class="eyebrow">Section 5</p>
+<h1>Content Architecture — Sectors, Pillars, Answer Pages</h1>
+<hr class="rule">
+<p>The traditional plan called for 3 sector pages, 1 pillar, 3 founder-facing insights, 1 research report, and 1 market map. The LLM plan called for 5 pillar pages. These merge cleanly — the sector pages plus the traditional pillar together cover the 5 LLM pillars with minor re-labelling. Each page does double duty.</p>
+
+<table>
+<thead><tr><th>#</th><th>URL</th><th>Primary KW / Query</th><th>Format</th><th>Label</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>/sectors/quantum-sensing</code></td><td>quantum sensing (2,400/mo) + "who funds quantum sensing startups"</td><td>Sector page, 1,800–2,400 words; diagnostics / navigation / imaging verticals</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>2</td><td><code>/sectors/quantum-computing</code></td><td>quantum computing applications (880/mo) + "Series A quantum computing investors"</td><td>Sector page, applications-first framing (not broad head term)</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>3</td><td><code>/sectors/quantum-communications</code></td><td>quantum cryptography (4,400/mo) + "post quantum cryptography investors"</td><td>Sector page; PQC + NIST + secure comms</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>4</td><td><code>/insights/quantum-venture-capital</code></td><td>quantum venture capital (40/mo, KD 6) + "what is a quantum fund"</td><td>Pillar hub + definition page; FAQ block; Firgun thesis in first 100 words</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>5</td><td><code>/insights/series-a-quantum-startups</code></td><td>quantum computing startups (320/mo) + "who invests Series A quantum"</td><td>Founder guide + readiness checklist + investor shortlist</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>6</td><td><code>/insights/quantum-startup-funding</code></td><td>quantum startups (110/mo) + "how to raise Series A for a quantum startup"</td><td>Founder guide; Series A/B criteria; step-by-step format</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>7</td><td><code>/insights/lab-to-market-quantum</code></td><td>"lab to market quantum startups"</td><td>Framework page bridging university IP to commercial quantum</td><td><span class="badge badge-llm">LLM</span></td></tr>
+<tr><td>8</td><td><code>/research/quantum-funding-report-2026</code></td><td>quantum investment (260/mo) + "quantum funding trends 2026"</td><td>Signature data report; Report schema; headline numbers up top</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>9</td><td><code>/market-map/quantum-startups</code></td><td>"quantum market map"</td><td>Interactive market map; citeable asset for journalists and LLMs</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>10</td><td><code>/newsletter</code> (activate)</td><td>"firgun newsletter" + issue-level long-tails</td><td>Active publishing surface; each issue a standalone URL at <code>/newsletter/&lt;slug&gt;</code> with Article schema</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>11</td><td><code>/insights</code> (hub)</td><td>long-tail editorial queries</td><td>Feed view of all insights; category tags (Sectors, Founder Guides, Market Reports)</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>12</td><td><code>/faq</code> (expanded)</td><td>"quantum venture capital FAQ" + long-tail questions</td><td>FAQ page with FAQPage schema; one Q per conversational query from §4.2</td><td><span class="badge badge-both">BOTH</span></td></tr>
+</tbody>
+</table>
+
+<h2>Answer-shape rules for every page on firgun.vc</h2>
+
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span>
+  <p><strong>Lead with a one-sentence definition or answer</strong> in the first 60 words. LLMs preferentially quote the first authoritative sentence; Google uses it for snippet eligibility.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span>
+  <p><strong>Name Firgun in the second paragraph</strong> with an entity-linked mention (e.g. "Firgun Ventures, a $250m Series A/B quantum fund"). Consistent phrasing across pages reinforces the entity.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span>
+  <p><strong>Use H2s phrased as questions</strong> that match conversational queries. Both surfaces reward this: Google uses H2 for topical coverage, LLMs use H2 to chunk retrieval.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span>
+  <p><strong>End every page with a FAQ block</strong> that covers 5–8 of the conversational queries from §4.2. Wrap in FAQPage JSON-LD.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-trad">TRADITIONAL SEO</span></span>
+  <p><strong>Internal-link target map:</strong> every sector page links to <code>/insights/quantum-venture-capital</code> with the anchor "quantum venture capital", and the pillar links back with sector-specific anchors.</p></div>
+
+<div class="framer-box">
+  <div class="b-title">Framer Note — Content structure</div>
+  <p><strong>Use a CMS collection</strong> for <code>/insights</code>, <code>/newsletter</code>, and <code>/sectors</code>. One collection template per type; fields for <code>title</code>, <code>slug</code>, <code>summary</code>, <code>body</code> (rich text), <code>datePublished</code>, <code>author</code> (relation to a People collection). This gives you automatic <code>/insights</code> feed pages, consistent Article JSON-LD, and per-issue newsletter URLs for free.</p>
+  <p><strong>Avoid "Text with image overlay" components</strong> for body copy on ranking pages — they sometimes render only via client-side JS.</p>
+</div>
+</section>
+
+<!-- SECTION 6 -->
+<section id="s6" class="section">
+<p class="eyebrow">Section 6</p>
+<h1>Distribution — On-Domain Editorial, PR, LP Surface</h1>
+<hr class="rule">
+<p>The highest-ROI distribution change is <strong>making firgun.vc the canonical home of every piece of editorial Firgun produces</strong>. Every external publication, podcast appearance, or guest essay should route back to an on-domain URL that can accumulate rankings and citations.</p>
+
+<h2>6.1 Activate on-domain editorial</h2>
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span>
+  <p><strong>Make <code>/newsletter</code> an active publishing surface.</strong> Each issue published as a standalone URL at <code>/newsletter/&lt;slug&gt;</code> with Article schema (author=Person, publisher=Organization). The page currently lacks an H1 — fix that, then start publishing.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span>
+  <p><strong>Use <code>/insights</code> as the content hub</strong> — a feed view across sector essays, founder guides, and market commentary. Every external guest essay (VC Cafe, Forbes, Substack) should have a canonical on-domain version with <code>rel=canonical</code> or precede the syndication.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span>
+  <p><strong>If Firgun records any podcasts or videos, publish transcripts on-domain.</strong> LLMs do not listen to audio or watch video at retrieval time — a 3,000–6,000 word transcript becomes citeable text that an audio file never will.</p></div>
+
+<h2>6.2 PR and backlinks (Ahrefs data)</h2>
+<div class="tagged"><span class="b"><span class="badge badge-trad">TRADITIONAL SEO</span></span>
+  <p><strong>Convert existing referrers</strong> (Forbes, Substack, Entrepreneur, Crunchbase, Quantum Computing Report, FounderSuite, Supernova Fest, Everything Startups) from homepage links to <em>deep links</em> on sector pages and the research report. Reach out individually — this is where DR-weighted link equity becomes category authority.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-trad">TRADITIONAL SEO</span></span>
+  <p><strong>Pitch <code>/research/quantum-funding-report-2026</code></strong> to tier-1 quantum-industry journalists (The Quantum Insider, McKinsey Quantum, Nature, MIT Tech Review) with exclusive data cuts.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span>
+  <p><strong>Seek Wikipedia presence</strong> for Firgun Ventures and within the "quantum venture capital" / "quantum computing startups" pages. Wikipedia is over-indexed as an LLM training source.</p></div>
+
+<h2>6.3 LP surface</h2>
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span>
+  <p><strong><code>/lp</code> and <code>/thesis</code> pages</strong> (gated or ungated) describe Firgun's fund model, commercialization thesis, and investment criteria. LPs increasingly brief themselves via ChatGPT / Perplexity before a first meeting; these pages fill the answer.</p></div>
+
+<div class="framer-box">
+  <div class="b-title">Framer Note — Editorial pipeline</div>
+  <p>Build an <strong>"Insights" CMS collection</strong> once, then route three URL patterns off it by CMS field: <code>type = "newsletter"</code> → <code>/newsletter/:slug</code>, <code>type = "essay"</code> → <code>/insights/:slug</code>, <code>type = "report"</code> → <code>/research/:slug</code>. Framer supports multiple collection pages off a single collection via URL templates.</p>
+  <p>For guest essays syndicated on VC Cafe, Forbes, or Substack, <strong>publish the canonical version on firgun.vc first</strong>, then ask the partner to set <code>rel=canonical</code> back. Most partners will — and Google + LLMs will credit firgun.vc.</p>
+</div>
+</section>
+
+<!-- SECTION 7 -->
+<section id="s7" class="section">
+<p class="eyebrow">Section 7</p>
+<h1>Quick Wins — First 14 Days</h1>
+<hr class="rule">
+<p>The five lowest-effort, highest-impact items. Ordered by ROI. Each scoped to a single sprint.</p>
+
+<ol class="wins">
+<li><span class="badge badge-both">BOTH</span> &nbsp; <strong>Ship Organization JSON-LD site-wide.</strong> One custom-code paste in Framer's <em>End of &lt;head&gt;</em> setting. Include <code>@id</code>, <code>legalName</code>, <code>foundingDate</code>, <code>description</code>, <code>url</code>, <code>logo</code>, <code>sameAs</code> (LinkedIn, Crunchbase, X/Twitter), <code>numberOfEmployees</code>. The single highest-leverage action in the plan.</li>
+<li><span class="badge badge-llm">LLM SEO</span> &nbsp; <strong>Ship Person JSON-LD for each GP.</strong> Add to the <code>/team</code> page and reference from the Organization graph as <code>employee</code>. Unlocks attributed quotes in LLM answers.</li>
+<li><span class="badge badge-both">BOTH</span> &nbsp; <strong>Activate <code>/newsletter</code>.</strong> Publish the first new issue as a standalone URL <code>/newsletter/&lt;slug&gt;</code>. Start with the highest-quality recent market commentary Firgun has — even one issue live with Article schema starts the entity clock.</li>
+<li><span class="badge badge-both">BOTH</span> &nbsp; <strong>Wrap <code>/faq</code> answers in FAQPage JSON-LD</strong> and add 10 new Q/A pairs drawn from the conversational queries in §4.2. This single page will be quoted more than almost any other.</li>
+<li><span class="badge badge-llm">LLM SEO</span> &nbsp; <strong>Unblock AI crawlers in <code>robots.txt</code></strong> and publish a first <code>llms.txt</code> (or /ai-brief page referenced from robots.txt). 30-minute job.</li>
+</ol>
+
+<h2>Ahrefs-surfaced hygiene bundle (same 14 days, separate workstream) <span class="badge badge-trad">TRADITIONAL SEO</span></h2>
+<p>Bundle: remove <code>/404</code> from sitemap; add H1 to <code>/newsletter</code>, <code>/careers</code>, <code>/faq</code>; shorten home + portfolio + FAQ titles; rewrite 6 meta descriptions; patch 48 missing alt texts (prioritise <code>/news</code>); review <code>/linkedin</code> noindex. All 6 items ship in one Framer release.</p>
+</section>
+
+<!-- SECTION 8 -->
+<section id="s8" class="section">
+<p class="eyebrow">Section 8</p>
+<h1>Competitive &amp; Citation Gap</h1>
+<hr class="rule">
+
+<h2>8.1 Traditional SEO competitors (DataForSEO) <span class="badge badge-trad">TRADITIONAL SEO</span></h2>
+<table>
+<thead><tr><th>Domain</th><th>Keywords</th><th>Est. Traffic</th><th>Traffic Value</th><th>Top-3 KWs</th><th>Top-10 KWs</th></tr></thead>
+<tbody>
+<tr><td>firgun.vc</td><td>1</td><td>0.4</td><td>$3</td><td>0</td><td>0</td></tr>
+<tr><td>quantonation.com</td><td>46</td><td>109.7</td><td>$183</td><td>2</td><td>6</td></tr>
+<tr><td>qdnlparticipations.nl</td><td>4</td><td>19.7</td><td>$0</td><td>2</td><td>2</td></tr>
+<tr><td>qai-ventures.com</td><td>29</td><td>37.7</td><td>$50</td><td>1</td><td>5</td></tr>
+<tr><td>qubitventures.com</td><td>N/A</td><td>N/A</td><td>N/A</td><td>0</td><td>0</td></tr>
+<tr><td>55north.vc</td><td>N/A</td><td>N/A</td><td>N/A</td><td>0</td><td>0</td></tr>
+</tbody>
+</table>
+<p><strong>Traditional gap read:</strong> the specialist-fund competitive set is <em>surprisingly open</em>. Quantonation has 46 ranking keywords; nobody else cracks 30. The harder competitors are not fund sites — they are authoritative publishers (Wikipedia, NIST, IBM, Cloudflare, McKinsey, The Quantum Insider). Do not fight them on broad education terms first; compete where Firgun can add proprietary investor judgment.</p>
+
+<h2>8.2 LLM citation gap <span class="badge badge-llm">LLM SEO</span></h2>
+<p>When ChatGPT, Claude, Perplexity, and Gemini are asked any of the 15 conversational queries in §4.2, Firgun is currently cited for 0 of them. The most-cited domains for these queries today are The Quantum Insider, McKinsey, Crunchbase, LinkedIn, Forbes, BAE Systems, IBM, and Wikipedia.</p>
+
+<div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span>
+  <p><strong>Primary target:</strong> get Firgun cited for "who invests in quantum computing startups" and "best quantum venture capital firms 2026" within 90 days. These are the two highest-intent LP/founder prompts.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span>
+  <p><strong>Secondary target:</strong> ensure homepage + Organization schema make "who is Firgun Ventures" and "$250m quantum venture fund" return a correct, consistent entity answer. This is how human due diligence starts in 2026.</p></div>
+
+<div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span>
+  <p><strong>Benchmarking:</strong> run monthly Brand Radar / AI-impressions tracking. Measure AI Overview appearances, cited-domains share, cited-pages share, and share of voice on the 15 target queries.</p></div>
+</section>
+
+<!-- SECTION 9 -->
+<section id="s9" class="section">
+<p class="eyebrow">Section 9</p>
+<h1>Integrated 90-Day Roadmap</h1>
+<hr class="rule">
+<p>This roadmap merges the traditional-SEO 90-day priorities (Ahrefs week-1 hygiene, sector surface weeks 2–4, data asset weeks 5–8, authority weeks 9–12) with the LLM-SEO 30-60-90 arc (entity gate, content scale, citation acquisition). Every week has a traditional and an LLM lane running in parallel.</p>
+
+<table>
+<thead><tr><th>Weeks</th><th>Traditional SEO lane</th><th>LLM SEO lane</th><th>Shared (BOTH)</th></tr></thead>
+<tbody>
+<tr><td>Week 1</td><td>Ahrefs hygiene bundle (sitemap, H1, titles, meta, alt, noindex). Submit updated sitemap to GSC.</td><td>Ship Organization + Person JSON-LD site-wide via Framer custom head. Unblock GPTBot / PerplexityBot / ClaudeBot in <code>robots.txt</code>. Publish <code>llms.txt</code> (or /ai-brief).</td><td>Audit raw HTML (no-JS) for all pages. Add FAQPage schema to <code>/faq</code> with 10 new Q/A.</td></tr>
+<tr><td>Weeks 2–4</td><td>Publish <code>/sectors/quantum-sensing</code>, <code>/sectors/quantum-computing</code>, <code>/sectors/quantum-communications</code>. Internal-link bundle.</td><td>Activate <code>/newsletter</code> as publishing surface — first 3 issues live with Article schema. Ensure every new page has Person author entity.</td><td>Publish <code>/insights/quantum-venture-capital</code> as the pillar hub. All new pages follow answer-shape rules.</td></tr>
+<tr><td>Weeks 5–8</td><td>Publish <code>/research/quantum-funding-report-2026</code> + <code>/market-map/quantum-startups</code>. Pitch to Forbes, Quantum Insider, McKinsey.</td><td>Expand <code>/insights</code> feed. If podcasts exist, publish transcripts. Ensure every insights URL has Person author and Article schema.</td><td>Publish <code>/insights/series-a-quantum-startups</code> + <code>/insights/quantum-startup-funding</code>. Report schema on research asset.</td></tr>
+<tr><td>Weeks 9–12</td><td>Request updated deep links from PR / referring domains. Track non-brand rankings weekly. Monitor SERP feature eligibility.</td><td>Begin monthly Brand Radar / AI-impressions tracking. Measure share of voice on the 15 conversational queries. Wikipedia outreach.</td><td>Publish <code>/insights/lab-to-market-quantum</code>. Expand <code>/faq</code> to cover all 15 conversational queries. LP-surface pages (<code>/thesis</code>, <code>/lp</code>).</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- SECTION 10 -->
+<section id="s10" class="section">
+<p class="eyebrow">Section 10</p>
+<h1>Measurement — What to Track in Each Channel</h1>
+<hr class="rule">
+<p>The two surfaces require different dashboards. Do not try to collapse them into one number — Google traffic and LLM citations follow different logic. But they can share a monthly review cadence.</p>
+
+<h2>Traditional KPIs <span class="badge badge-trad">TRADITIONAL SEO</span></h2>
+<div class="tagged"><span class="b"><span class="badge badge-trad">TRADITIONAL SEO</span></span><p><strong>Ahrefs Organic Keywords</strong> — move from 1–2 (branded) to 20+ non-brand by end of Q3.</p></div>
+<div class="tagged"><span class="b"><span class="badge badge-trad">TRADITIONAL SEO</span></span><p><strong>Ahrefs Organic Traffic</strong> — baseline 0.43/mo. Target 200+/mo by end of Q3.</p></div>
+<div class="tagged"><span class="b"><span class="badge badge-trad">TRADITIONAL SEO</span></span><p><strong>Ahrefs DR</strong> — currently 19 (+14). Target DR 25 via category-page links.</p></div>
+<div class="tagged"><span class="b"><span class="badge badge-trad">TRADITIONAL SEO</span></span><p><strong>Search Console impressions + clicks</strong> on the 13 priority keywords in §4.1.</p></div>
+<div class="tagged"><span class="b"><span class="badge badge-trad">TRADITIONAL SEO</span></span><p><strong>SERP feature capture</strong> — track AI Overview, PAA, snippet appearances for the priority set.</p></div>
+
+<h2>LLM KPIs <span class="badge badge-llm">LLM SEO</span></h2>
+<div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span><p><strong>AI mentions / impressions</strong> — monthly Brand Radar pull across ChatGPT, Claude, Perplexity, Gemini.</p></div>
+<div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span><p><strong>Cited domains share</strong> — how often firgun.vc appears in the citations panel for the 15 target queries.</p></div>
+<div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span><p><strong>Cited pages</strong> — which firgun.vc URLs are being quoted; reinforces content priorities.</p></div>
+<div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span><p><strong>Share of voice</strong> vs Quantonation, QDNL, QAI, The Quantum Insider on quantum-fund prompts.</p></div>
+<div class="tagged"><span class="b"><span class="badge badge-llm">LLM SEO</span></span><p><strong>Entity consistency check</strong> — monthly prompt test: does ChatGPT return the correct fund size, vintage, sectors?</p></div>
+
+<h2>Shared KPIs <span class="badge badge-both">BOTH</span></h2>
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span><p><strong>Inbound founder pitches from organic and AI sources</strong> — ultimate business metric.</p></div>
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span><p><strong>Referring domains growth</strong> — Ahrefs + LLM training data both value fresh, varied referrers.</p></div>
+<div class="tagged"><span class="b"><span class="badge badge-both">BOTH</span></span><p><strong>Schema health</strong> — Google Rich Results Test + manual JSON-LD validation monthly.</p></div>
+</section>
+
+<!-- SECTION 11 -->
+<section id="s11" class="section">
+<p class="eyebrow">Section 11</p>
+<h1>Deprioritised Keywords &amp; Queries</h1>
+<hr class="rule">
+<p>Explicitly excluded so the strategy does not drift back toward attractive but low-fit head terms.</p>
+<table>
+<thead><tr><th>Keyword / Query</th><th>Vol/mo</th><th>Reason</th><th>Label</th></tr></thead>
+<tbody>
+<tr><td>quantum computing</td><td>110,000</td><td>KD 59, broad education intent. Contextual support only.</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>what is quantum computing</td><td>18,100</td><td>KD 59, top-funnel physics. Poor conversion fit for Series A/B.</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>quantum computing companies</td><td>4,400</td><td>KD 81; SERP led by Quantum Insider + vendor homepages.</td><td><span class="badge badge-trad">TRADITIONAL SEO</span></td></tr>
+<tr><td>quantum AI</td><td>8,100</td><td>Ambiguous AI / stock / research intent; weak fit for quantum fund positioning.</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>quantum computing ETF</td><td>9,900</td><td>Retail investor intent. Firgun is not an ETF or public-equities brand.</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>series a funding</td><td>3,600</td><td>Too broad; use inside quantum founder content, not as standalone target.</td><td><span class="badge badge-trad">TRADITIONAL SEO</span></td></tr>
+<tr><td>startup funding series a</td><td>0</td><td>DataForSEO returned zero US volume.</td><td><span class="badge badge-trad">TRADITIONAL SEO</span></td></tr>
+<tr><td>quantum technology investment</td><td>10</td><td>Very low volume and KD 52; FAQ language only.</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>venture capital quantum computing</td><td>10</td><td>Very low volume; fold into quantum venture capital pillar.</td><td><span class="badge badge-both">BOTH</span></td></tr>
+<tr><td>"what stocks should I buy for quantum"</td><td>LLM prompt</td><td>Retail-investor prompt; LP/founder confusion risk.</td><td><span class="badge badge-llm">LLM SEO</span></td></tr>
+<tr><td>"is quantum computing a scam"</td><td>LLM prompt</td><td>Adversarial framing; do not optimise to appear here.</td><td><span class="badge badge-llm">LLM SEO</span></td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- SECTION 12 -->
+<section id="s12" class="section">
+<p class="eyebrow">Section 12</p>
+<h1>Framer Implementation Playbook <span class="badge badge-framer">FRAMER</span></h1>
+<hr class="rule">
+<p>All of the above is executable inside Framer without third-party hosting. Here is a consolidated checklist of exactly <em>where</em> each change goes in the Framer admin.</p>
+
+<h2>Site-wide settings</h2>
+<table>
+<thead><tr><th>Change</th><th>Framer location</th></tr></thead>
+<tbody>
+<tr><td>Organization + Person JSON-LD (paste once)</td><td>Site Settings → General → Custom Code → <strong>End of <code>&lt;head&gt;</code> tag</strong></td></tr>
+<tr><td>robots.txt with AI crawler allow rules</td><td>Site Settings → General → <strong>Custom robots.txt</strong></td></tr>
+<tr><td>sitemap.xml adjustments</td><td>Site Settings → General → <strong>Custom sitemap</strong> (or exclude /404 via page noindex)</td></tr>
+<tr><td>Default social / OG image</td><td>Site Settings → SEO &amp; Social → <strong>Open Graph image</strong></td></tr>
+<tr><td>Google Search Console verification</td><td>Site Settings → General → Custom Code → <strong>Start of <code>&lt;head&gt;</code></strong> (meta tag method)</td></tr>
+</tbody>
+</table>
+
+<h2>Per-page settings</h2>
+<table>
+<thead><tr><th>Change</th><th>Framer location</th></tr></thead>
+<tbody>
+<tr><td>Page title (&lt;title&gt;)</td><td>Page Settings → SEO → <strong>Title</strong></td></tr>
+<tr><td>Meta description</td><td>Page Settings → SEO → <strong>Description</strong></td></tr>
+<tr><td>Canonical URL</td><td>Page Settings → SEO → <strong>Canonical URL</strong></td></tr>
+<tr><td>noindex</td><td>Page Settings → SEO → <strong>Exclude from search engines</strong></td></tr>
+<tr><td>H1 text element</td><td>On canvas, set a text element's tag to <strong>H1</strong> in the right-hand panel</td></tr>
+<tr><td>Page-specific JSON-LD (Article, Report, FAQPage)</td><td>Page Settings → Custom Code → <strong>End of <code>&lt;head&gt;</code></strong></td></tr>
+<tr><td>Image alt text</td><td>Select image → right panel → <strong>Accessibility → Alt text</strong></td></tr>
+</tbody>
+</table>
+
+<h2>CMS-driven collections</h2>
+<div class="tagged"><span class="b"><span class="badge badge-framer">FRAMER</span></span>
+  <p><strong>Create an "Insights" CMS collection</strong> with fields: <code>title</code>, <code>slug</code>, <code>type</code> (enum: essay / newsletter / report), <code>summary</code>, <code>body</code>, <code>datePublished</code>, <code>dateModified</code>, <code>author</code> (relation to a "People" collection), <code>heroImage</code>, <code>tags</code> (multi-select).</p></div>
+<div class="tagged"><span class="b"><span class="badge badge-framer">FRAMER</span></span>
+  <p><strong>Create a "People" CMS collection</strong> for GPs with fields: <code>name</code>, <code>slug</code>, <code>role</code>, <code>bio</code>, <code>linkedin</code>, <code>twitter</code>, <code>alumniOf</code>, <code>knowsAbout</code>. Drives Person JSON-LD and author bylines.</p></div>
+<div class="tagged"><span class="b"><span class="badge badge-framer">FRAMER</span></span>
+  <p><strong>Use the collection page template</strong> to bind Article JSON-LD fields (<code>headline</code>, <code>author.name</code>, <code>datePublished</code>) automatically to each published entry. One template, unlimited articles.</p></div>
+
+<h2>Raw-HTML audit (priority zero)</h2>
+<p>Before publishing anything new, run <code>curl -A "Mozilla/5.0" https://firgun.vc/ | grep -i quantum</code> against each existing page. If the page copy is missing from the curl output, it is being rendered only client-side and is invisible to most LLM crawlers. Move those paragraphs into plain text blocks. Repeat for every sector, pillar, and insights page as it goes live.</p>
+</section>
+
+<!-- SECTION 13 -->
+<section id="s13" class="section">
+<p class="eyebrow">Section 13</p>
+<h1>Sources and Data Provenance</h1>
+<hr class="rule">
+
+<table>
+<thead><tr><th>Source</th><th>URL / artefact</th><th>Used for</th></tr></thead>
+<tbody>
+<tr><td>Firgun homepage</td><td>firgun.vc</td><td>Positioning: Series A/B quantum scale-ups; computing, communications/cryptography, sensing/imaging.</td></tr>
+<tr><td>Firgun FAQ</td><td>firgun.vc/faq</td><td>Differentiators: knowledge graph, Series A/B focus, deep tech specialisation.</td></tr>
+<tr><td>Firgun portfolio</td><td>firgun.vc/portfolio</td><td>Fund positioning: $250m quantum-only fund.</td></tr>
+<tr><td>Quantonation</td><td>quantonation.com</td><td>Competitor: EUR 220m quantum and physics-based fund.</td></tr>
+<tr><td>QDNL</td><td>qdnlparticipations.nl</td><td>Competitor: quantum investor with news/content footprint.</td></tr>
+<tr><td>DataForSEO API v3</td><td>Local export, US English, 2026-04-20</td><td>Keyword, SERP, and domain signals.</td></tr>
+<tr><td>Ahrefs export</td><td>User-provided, 2026-04-20</td><td>Technical health, DR, referring-domain profile, branded visibility, AI citation baseline.</td></tr>
+<tr><td>LLM SEO readiness review</td><td>headofgrowth.pro/firgun/</td><td>Schema gap audit, conversational query mapping, 30-60-90 roadmap.</td></tr>
+</tbody>
+</table>
+
+<p style="margin-top:18px;"><strong>Correction vs. earlier draft:</strong> an earlier version of this strategy referenced a newsletter hosted on VC Cafe's domain (<code>vccafe.com/category/firgun-newsletter</code>). That VC Cafe newsletter is not Firgun Ventures' output — it is a separate publication that shares the name. The distribution section has been revised accordingly: the priority is to activate <strong>firgun.vc/newsletter</strong> as an active publishing surface, not to migrate an off-domain archive.</p>
+</section>
+
+<footer>
+Prepared for Firgun Ventures. Combines the DataForSEO + Ahrefs traditional organic strategy (firgun-seo-strategy.pdf, April 20, 2026) with the LLM / GEO readiness review, implementation-grounded for Framer.
+</footer>
+
+</div>
+</body>
+</html>
